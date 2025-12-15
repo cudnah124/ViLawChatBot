@@ -1,6 +1,11 @@
+from fastapi import APIRouter, UploadFile, File, HTTPException
+from app.services.ocr_service import OCRService
+from app.schemas.document_schema import DocumentAnalysisResponse, DocumentMetadataResponse
 from app.db.session import SessionLocal
 from app.db.models import DocumentMetadata
-from app.schemas.document_schema import DocumentMetadataResponse
+
+router = APIRouter()
+ocr_service = OCRService()
 
 @router.get("/metadata/{metadata_id}", response_model=DocumentMetadataResponse)
 async def get_document_metadata(metadata_id: int):
@@ -12,12 +17,6 @@ async def get_document_metadata(metadata_id: int):
         return doc
     finally:
         db.close()
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from app.services.ocr_service import OCRService
-from app.schemas.document_schema import DocumentAnalysisResponse
-
-router = APIRouter()
-ocr_service = OCRService()
 
 @router.post("/analyze", response_model=DocumentAnalysisResponse)
 async def analyze_document_endpoint(file: UploadFile = File(...)):
