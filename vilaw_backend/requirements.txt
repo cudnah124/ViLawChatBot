@@ -1,3 +1,4 @@
+supabase-py
 fastapi
 uvicorn
 python-dotenv
@@ -12,3 +13,7 @@ pydantic-settings
 pinecone-client
 torch
 transformers
+python-docx
+python-multipart    # Để nhận file upload từ API
+pillow
+psycopg2-binary

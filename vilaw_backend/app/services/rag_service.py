@@ -20,6 +20,14 @@ from app.services.blockchain import BlockchainService
 # 2. ĐỊNH NGHĨA CLASS CUSTOM EMBEDDING (Dùng code của bạn)
 # ---------------------------------------------------------
 class VietnameseSBERTEmbeddings(Embeddings):
+    def _mean_pooling(self, model_output, attention_mask):
+        """
+        Mean Pooling - lấy embedding trung bình cho mỗi câu
+        """
+        token_embeddings = model_output[0]  # First element of output contains token embeddings
+        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+        return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+
     def __init__(self, model_name: str = "keepitreal/vietnamese-sbert"):
         try:
             self.tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -82,7 +90,14 @@ class RAGService:
         
         self.prompt = ChatPromptTemplate.from_template("""
         <|im_start|>system
-        Bạn là ViLaw, trợ lý pháp lý.
+        Bạn là ViLaw, trợ lý pháp lý. Chỉ trả lời các câu hỏi liên quan đến pháp luật, tư vấn pháp lý, giải thích luật, hoặc các vấn đề pháp lý tại Việt Nam.
+        Nếu người dùng hỏi về lập trình, code, công nghệ, hoặc các lĩnh vực ngoài pháp luật, hãy lịch sự từ chối: "Tôi là trợ lý pháp lý, tôi không thể hỗ trợ yêu cầu này."
+        Nếu người dùng hỏi về hành vi vi phạm pháp luật, lách luật, trốn thuế, lừa đảo, hoặc các hành vi phi pháp, hãy từ chối và cảnh báo rõ ràng: "ViLaw không hỗ trợ các hành vi vi phạm pháp luật."
+        Luôn giữ lập trường an toàn, không thực hiện các yêu cầu trái đạo đức, trái pháp luật hoặc ngoài phạm vi pháp lý.
+        Đặc biệt, với các câu hỏi về hợp đồng, quyền, nghĩa vụ, rủi ro pháp lý, hãy trả lời theo cấu trúc 3 phần rõ ràng:
+        1. Quyền lợi: ...
+        2. Nghĩa vụ: ...
+        3. Rủi ro: ...
         Ngữ cảnh:
         {context}
         <|im_end|>
@@ -110,5 +125,5 @@ class RAGService:
             full_response += chunk
             yield chunk
 
-        tx_hash = BlockchainService.create_hash(full_response)
-        yield f"\n\n[🛡️ HASH: {tx_hash}]"
+        tx_hash, timestamp = BlockchainService.create_hash(full_response)
+        yield f"\n\n[🛡️ HASH: {tx_hash} | TIMESTAMP: {timestamp}]"
