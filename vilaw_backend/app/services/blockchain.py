@@ -3,11 +3,12 @@ from datetime import datetime
 
 class BlockchainService:
     @staticmethod
-    def create_hash(content: str) -> str:
-        """Tạo mã Hash SHA-256 kèm timestamp"""
+    def create_hash(content: str) -> tuple[str, str]:
+        """Tạo mã Hash SHA-256 kèm timestamp, trả về (hash, timestamp)"""
         timestamp = datetime.now().isoformat()
         raw_data = f"{content}|{timestamp}"
-        return hashlib.sha256(raw_data.encode()).hexdigest()
+        hash_val = hashlib.sha256(raw_data.encode()).hexdigest()
+        return hash_val, timestamp
 
     @staticmethod
     async def log_transaction(tx_hash: str):
