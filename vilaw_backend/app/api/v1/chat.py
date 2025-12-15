@@ -11,7 +11,11 @@ async def chat_endpoint(request: ChatRequest):
     """
     API Chat tư vấn luật (Streaming).
     """
+    conversation_id = request.conversation_id or '1'
     return StreamingResponse(
-        rag_service.chat_stream(request.question),
+        rag_service.chat_stream(
+            message=request.message,
+            conversation_id=conversation_id
+        ),
         media_type="text/event-stream"
     )

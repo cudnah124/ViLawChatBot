@@ -1,5 +1,6 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class ChatRequest(BaseModel):
-    question: str
-    # Có thể mở rộng thêm: conversation_id, user_id...
+    message: str
+    conversation_id: Optional[str] = '1'
