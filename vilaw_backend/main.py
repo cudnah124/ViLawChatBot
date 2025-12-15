@@ -14,7 +14,7 @@ app = FastAPI(title="ViLaw Backend API", version="1.0")
 # Thêm CORS middleware để cho phép frontend truy cập
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://studious-pancake-69wrj6p9qpv93r76j-5000.app.github.dev"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,6 +37,10 @@ def health_check():
     return {"status": "ok", "message": "ViLaw Server is running"}
 
 if __name__ == "__main__":
+    # Tạo tất cả các bảng nếu chưa có
+    from app.db.session import engine
+    from app.db import models
+    models.Base.metadata.create_all(bind=engine)
     port = int(os.environ.get("PORT", 8000))
     print("App started, will run uvicorn on port", port, flush=True)
     uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
