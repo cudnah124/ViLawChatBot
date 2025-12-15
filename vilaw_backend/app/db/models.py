@@ -1,3 +1,9 @@
+
+from sqlalchemy import Column, Integer, String, ForeignKey, JSON
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
 class DocumentMetadata(Base):
     __tablename__ = "document_metadata"
     id = Column(Integer, primary_key=True)
@@ -9,10 +15,6 @@ class DocumentMetadata(Base):
     created_at = Column(String)                  # ISO format hoặc DateTime
     conversation_id = Column(String, ForeignKey("conversations.conversation_id"), nullable=True)
     message_id = Column(Integer, ForeignKey("messages.id"), nullable=True)
-from sqlalchemy import Column, Integer, String, ForeignKey, JSON
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
 
 # Bảng users mẫu
 class User(Base):

@@ -1,3 +1,7 @@
+
+from typing import List, Optional
+from pydantic import BaseModel
+
 class DocumentMetadataResponse(BaseModel):
     id: int
     external_id: Optional[str]
@@ -8,8 +12,6 @@ class DocumentMetadataResponse(BaseModel):
     created_at: Optional[str]
     conversation_id: Optional[str]
     message_id: Optional[int]
-from typing import List, Optional
-from pydantic import BaseModel
 
 class Clause(BaseModel):
     number: Optional[str]
