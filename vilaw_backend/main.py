@@ -22,9 +22,8 @@ async def lifespan(app: FastAPI):
         print(f"WARNING: Database initialization failed: {e}")
 
     yield
-    
-    # Logic khi server tắt
-    print("--- Server Shutting Down ---")
+    # Shutdown
+    pass
 
 app = FastAPI(title="ViLaw Backend API", version="1.0", lifespan=lifespan)
 
