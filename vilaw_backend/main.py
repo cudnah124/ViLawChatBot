@@ -37,9 +37,10 @@ def health_check():
     return {"status": "ok", "message": "ViLaw Server is running"}
 
 
-from app.db.session import engine
-from app.db import models
-models.Base.metadata.create_all(bind=engine)
+@app.on_event("startup")
+def startup():
+    from app.db.init_db import init_db
+    init_db()
 # if __name__ == "__main__":
 #     # Tạo tất cả các bảng nếu chưa có
 #     from app.db.session import engine
