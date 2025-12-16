@@ -1,3 +1,4 @@
+Pillow
 fastapi
 uvicorn
 python-dotenv
@@ -10,4 +11,4 @@ python-docx
 python-multipart 
 rank_bm25
 underthesea
-Pillow
+google.generativeai
