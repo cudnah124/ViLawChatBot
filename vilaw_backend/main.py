@@ -36,11 +36,15 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 def health_check():
     return {"status": "ok", "message": "ViLaw Server is running"}
 
-if __name__ == "__main__":
-    # Tạo tất cả các bảng nếu chưa có
-    from app.db.session import engine
-    from app.db import models
-    models.Base.metadata.create_all(bind=engine)
-    port = int(os.environ.get("PORT", 8000))
-    print("App started, will run uvicorn on port", port, flush=True)
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
+
+from app.db.session import engine
+from app.db import models
+models.Base.metadata.create_all(bind=engine)
+# if __name__ == "__main__":
+#     # Tạo tất cả các bảng nếu chưa có
+#     from app.db.session import engine
+#     from app.db import models
+#     models.Base.metadata.create_all(bind=engine)
+#     port = int(os.environ.get("PORT", 8000))
+#     print("App started, will run uvicorn on port", port, flush=True)
+#     uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
