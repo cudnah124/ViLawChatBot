@@ -26,4 +26,13 @@ async def check_risk_endpoint(request: RiskAnalysisRequest):
     Output: Báo cáo rủi ro chi tiết (JSON).
     """
     result = await risk_service.analyze_document(request)
+    # Sanitize output to match response model: ensure `legal_basis` is a string
+    try:
+        risks = result.get("risks") if isinstance(result, dict) else None
+        if isinstance(risks, list):
+            for r in risks:
+                if r.get("legal_basis") is None:
+                    r["legal_basis"] = "Theo quy định pháp luật hiện hành"
+    except Exception:
+        pass
     return result

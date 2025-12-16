@@ -28,9 +28,21 @@ async def analyze_document_endpoint(file: UploadFile = File(...)):
     if file.content_type not in ["image/jpeg", "image/png", "image/jpg"]:
         raise HTTPException(status_code=400, detail="Hiện tại bản Demo chỉ hỗ trợ file ảnh (JPG/PNG).")
     result = await ocr_service.process_document(file)
-    # Đảm bảo không trả về raw bytes, chỉ trả về JSON hợp lệ
-    if isinstance(result, dict):
-        for k, v in list(result.items()):
-            if isinstance(v, (bytes, bytearray)):
-                del result[k]
+    # Ensure response contains required fields matching DocumentAnalysisResponse
+    if not isinstance(result, dict):
+        result = {}
+    # Fill defaults
+    result.setdefault("filename", getattr(file, 'filename', ''))
+    result.setdefault("file_hash", "")
+    result.setdefault("blockchain_status", "")
+    result.setdefault("document_type", "Không xác định")
+    result.setdefault("entities", [])
+    result.setdefault("clauses", [])
+    result.setdefault("handwritten_notes", "")
+
+    # Remove raw bytes if any
+    for k, v in list(result.items()):
+        if isinstance(v, (bytes, bytearray)):
+            del result[k]
+
     return result
