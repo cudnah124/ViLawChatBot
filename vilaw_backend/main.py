@@ -18,6 +18,13 @@ async def lifespan(app: FastAPI):
         # Lưu ý: Đảm bảo biến môi trường DATABASE_URL đã được set trên Render
         init_db()
         print("Database connection initialized.")
+        # Pre-initialize RAG resources once per process to avoid lazy re-init on every request
+        try:
+            from app.services.rag_service import RAGService
+            RAGService._init_resources()
+            print("RAGService resources pre-initialized.")
+        except Exception as e:
+            print(f"Warning: RAGService init skipped: {e}")
     except Exception as e:
         print(f"WARNING: Database initialization failed: {e}")
 

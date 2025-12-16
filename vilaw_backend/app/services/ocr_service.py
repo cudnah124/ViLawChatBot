@@ -97,9 +97,9 @@ class OCRService:
             # --- Lưu vào Database ---
             db = SessionLocal()
             try:
-                doc_meta = DocumentMetadata(
+                # Use OCRDocument model (DocumentMetadata was legacy/undefined)
+                doc_meta = OCRDocument(
                     filename=filename,
-                    filetype=file_type,
                     ocr_text=json.dumps(parsed_result, ensure_ascii=False), # Lưu JSON đã parse thay vì raw text
                     created_at=datetime.now(timezone.utc), # Dùng timezone aware
                 )
@@ -129,6 +129,10 @@ class OCRService:
         """Wrapper dành cho FastAPI UploadFile"""
         content = await file.read()
         return await self.process_bytes(content, file.filename, file.content_type)
+
+    # Backwards-compatible alias expected by some callers
+    async def process_document(self, file: UploadFile) -> dict:
+        return await self.process_upload_file(file)
 
 
 # --- Hàm tiện ích (Utility Function) ---
