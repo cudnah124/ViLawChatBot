@@ -1,0 +1,4 @@
+
+# Ignore generated docs and local DB
+vilaw_backend/static/docs/
+vilaw_backend/vilaw_db.sqlite3
