@@ -10,3 +10,4 @@ python-docx
 python-multipart 
 rank_bm25
 underthesea
+Pillow
