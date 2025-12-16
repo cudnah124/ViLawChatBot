@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 from app.services.ocr_service import OCRService
 from app.schemas.document_schema import DocumentAnalysisResponse, DocumentMetadataResponse
 from app.db.session import SessionLocal
-from app.db.models import DocumentMetadata
+from app.db.models import OCRDocument
 
 router = APIRouter()
 ocr_service = OCRService()
