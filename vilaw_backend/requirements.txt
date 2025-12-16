@@ -6,12 +6,7 @@ langchain-openai
 langchain-community
 pydantic
 pydantic-settings
-pinecone-client
-torch
 python-docx
 python-multipart 
-pillow
-psycopg2-binary
 rank_bm25
 underthesea
-google-generativeai
