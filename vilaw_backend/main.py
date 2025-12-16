@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 # Import các router
-from app.api.v1 import chat, contracts, documents, procedures, upload
+from app.api.v1 import chat, contracts, documents, procedures, upload, db_viewer
 
 # --- 1. Lifespan: Quản lý khởi động & tắt server ---
 @asynccontextmanager
@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
         print("Database connection initialized.")
     except Exception as e:
         print(f"WARNING: Database initialization failed: {e}")
-    
+
     yield
     
     # Logic khi server tắt
@@ -29,10 +29,10 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="ViLaw Backend API", version="1.0", lifespan=lifespan)
 
 # --- 2. CORS: Cần thiết lập kỹ trên Production ---
-# Trên Render, bạn nên thay ["*"] bằng domain frontend của bạn (ví dụ: https://vilaw-frontend.onrender.com)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=["*"],
+    allow_origin_regex=".*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -44,6 +44,7 @@ app.include_router(contracts.router, prefix="/api/v1/contracts", tags=["Contract
 app.include_router(documents.router, prefix="/api/v1/documents", tags=["Document Analysis"])
 app.include_router(procedures.router, prefix="/api/v1/procedures", tags=["Procedures"])
 app.include_router(upload.router, prefix="/api/v1", tags=["Upload"])
+app.include_router(db_viewer.router, prefix="/api/v1", tags=["DB Viewer"])
 
 # --- 4. Xử lý Static Files (Lưu ý vấn đề mất dữ liệu trên Render) ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
