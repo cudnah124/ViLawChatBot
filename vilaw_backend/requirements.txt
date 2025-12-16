@@ -12,3 +12,4 @@ python-docx
 python-multipart 
 pillow
 psycopg2-binary
+rank_bm25
