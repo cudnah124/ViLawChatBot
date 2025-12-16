@@ -1,44 +1,30 @@
-1. AI Tư vấn & Hỏi đáp (Legal Chatbot)
-[ ] Xử lý ngôn ngữ tự nhiên (NLP): Hiểu tiếng lóng, văn phong kể chuyện, phân loại chính xác lĩnh vực.
+You are an expert RAG engineer.
 
-[ ] Kho luật "Sống": Tự động cập nhật văn bản mới, loại bỏ văn bản hết hiệu lực.
+I will provide you with my current RAG design / code.
+The current system uses dense embeddings (e.g. VietBERT) and a vector database (e.g. Pinecone).
 
-[ ] Trích xuất & Đối chiếu: Dẫn chứng chính xác Điều/Khoản/Điểm và link nguồn.
+Your task is to REFAC​TOR my system to use BM25-based retrieval instead.
 
-[ ] Diễn giải: Giải thích dễ hiểu theo 3 khía cạnh (Quyền lợi, Nghĩa vụ, Rủi ro).
+Hard constraints:
+- Remove ALL embedding models (VietBERT, sentence transformers, etc.).
+- Remove ALL vector databases (Pinecone, FAISS used for dense vectors).
+- Use BM25 as the ONLY retriever.
+- Retrieval must operate directly on Vietnamese legal text.
+- Use proper Vietnamese word segmentation (e.g. underthesea or equivalent).
+- The system must remain a valid RAG pipeline.
+- The final context passed to the LLM must be plain text.
+- The result must be suitable for free-tier deployment (low RAM, no GPU).
 
-[ ] Bảo chứng: Lưu mã băm (Hash) nội dung tư vấn lên Blockchain.
+What you must do:
+1. Identify all components related to embeddings and vector search.
+2. Remove or replace them with BM25 equivalents.
+3. Rewrite the retrieval pipeline step-by-step using BM25.
+4. Update the architecture description accordingly.
+5. If code is provided, output the refactored code.
+6. Explain briefly why each replacement is correct.
 
-2. AI Soạn thảo Văn bản (Smart Drafting)
-[ ] Khởi tạo thông minh: Lắp ghép điều khoản theo logic pháp lý (không dùng mẫu tĩnh).
-
-[ ] Thư viện biểu mẫu: Đầy đủ các loại đơn từ, hợp đồng, biên bản.
-
-[ ] Cá nhân hóa: Tự động điều chỉnh theo vai trò (Bên A/B) và ngữ cảnh.
-
-[ ] Kiểm tra rủi ro tức thì: Cảnh báo bất lợi ngay khi đang soạn thảo.
-
-[ ] Xuất bản: Hỗ trợ định dạng DOCX (để sửa) và PDF (bản chính).
-
-3. AI Phát hiện Sai sót & Rủi ro (Risk Checker)
-[ ] Kiểm tra tính đầy đủ: Phát hiện thiếu thông tin bắt buộc (chủ thể, ngày tháng, chữ ký...).
-
-[ ] Kiểm tra tính hợp pháp: Phát hiện điều khoản trái luật hoặc mâu thuẫn nội tại.
-
-[ ] Đánh giá rủi ro: Chấm điểm (Cao/Trung/Thấp) và chỉ ra các "bẫy câu chữ".
-
-[ ] Gợi ý sửa đổi: Đề xuất câu từ an toàn hơn kèm lý do pháp lý.
-
-4. AI Phân tích Tài liệu Upload (Document Analysis)
-[ ] OCR nâng cao: Nhận diện văn bản đánh máy và chữ viết tay từ file ảnh/PDF.
-
-[ ] Bóc tách dữ liệu: Phân tích cấu trúc, gắn nhãn pháp lý cho từng đoạn.
-
-[ ] Bảo chứng tài liệu: Hash file gốc lên Blockchain để đối chiếu về sau.
-
-5. Thủ tục Hành chính & Dashboard
-[ ] Chỉ dẫn quy trình: Hướng dẫn từng bước (Cơ quan, Thời gian, Lệ phí).
-
-[ ] Checklist hồ sơ: Liệt kê và hướng dẫn chuẩn bị giấy tờ cần thiết.
-
-[ ] Dashboard quản lý: Theo dõi trạng thái hồ sơ (Đã nộp/Đang chờ/Xong) và lưu trữ tập trung.
+Output format:
+- Section A: What was removed (embedding/vector parts)
+- Section B: What was added (BM25 components)
+- Section C: New RAG pipeline (step-by-step)
+- Section D: Refactored code / pseudo-code
