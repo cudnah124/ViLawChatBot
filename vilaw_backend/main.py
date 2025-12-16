@@ -11,20 +11,12 @@ from app.api.v1 import chat, contracts, documents, procedures, upload
 # --- 1. Lifespan: Quản lý khởi động & tắt server ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Logic khi server khởi động
-    print("--- Server Starting ---")
-    try:
-        from app.db.init import init_db
-        # Lưu ý: Đảm bảo biến môi trường DATABASE_URL đã được set trên Render
-        init_db()
-        print("Database connection initialized.")
-    except Exception as e:
-        print(f"WARNING: Database initialization failed: {e}")
-    
+    """Startup and shutdown events"""
+    # Tạm thời comment đoạn này lại:
+    # await init_db() 
     yield
-    
-    # Logic khi server tắt
-    print("--- Server Shutting Down ---")
+    # Shutdown
+    pass
 
 app = FastAPI(title="ViLaw Backend API", version="1.0", lifespan=lifespan)
 
