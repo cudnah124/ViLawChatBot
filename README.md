@@ -1,30 +1,73 @@
-You are an expert RAG engineer.
+# ViLaw - Legal AI Assistant
 
-I will provide you with my current RAG design / code.
-The current system uses dense embeddings (e.g. VietBERT) and a vector database (e.g. Pinecone).
+A RAG-based legal assistant for Vietnamese legislation analysis.
 
-Your task is to REFAC​TOR my system to use BM25-based retrieval instead.
+## Overview
 
-Hard constraints:
-- Remove ALL embedding models (VietBERT, sentence transformers, etc.).
-- Remove ALL vector databases (Pinecone, FAISS used for dense vectors).
-- Use BM25 as the ONLY retriever.
-- Retrieval must operate directly on Vietnamese legal text.
-- Use proper Vietnamese word segmentation (e.g. underthesea or equivalent).
-- The system must remain a valid RAG pipeline.
-- The final context passed to the LLM must be plain text.
-- The result must be suitable for free-tier deployment (low RAM, no GPU).
+ViLaw provides context-aware retrieval and analysis of Vietnamese legal documents using BM25 lexical search combined with LLM-powered responses. The system processes 1,000+ official legal documents with Vietnamese word segmentation for accurate query matching.
 
-What you must do:
-1. Identify all components related to embeddings and vector search.
-2. Remove or replace them with BM25 equivalents.
-3. Rewrite the retrieval pipeline step-by-step using BM25.
-4. Update the architecture description accordingly.
-5. If code is provided, output the refactored code.
-6. Explain briefly why each replacement is correct.
+## Tech Stack
 
-Output format:
-- Section A: What was removed (embedding/vector parts)
-- Section B: What was added (BM25 components)
-- Section C: New RAG pipeline (step-by-step)
-- Section D: Refactored code / pseudo-code
+- **Backend**: Python, FastAPI
+- **NLP**: LangChain, underthesea (Vietnamese tokenizer)
+- **Search**: BM25 (rank_bm25)
+- **Database**: SQLite / PostgreSQL
+- **LLM**: OpenRouter API
+
+## Features
+
+- Legal Q&A with contextual retrieval
+- Contract risk analysis
+- Legal procedure guidance
+- Document OCR processing
+- Admin dashboard for knowledge base management
+
+## Project Structure
+
+```
+vilaw_backend/
+├── app/
+│   ├── api/v1/          # API endpoints
+│   ├── core/            # Configuration
+│   ├── db/              # Database models
+│   ├── schemas/         # Pydantic schemas
+│   └── services/        # Business logic (RAG, OCR, etc.)
+├── static/              # Uploaded documents
+└── main.py              # Application entry point
+```
+
+## Setup
+
+```bash
+cd vilaw_backend
+pip install -r requirements.txt
+```
+
+Create `.env` file:
+```
+DATABASE_URL=sqlite:///./vilaw_db.sqlite3
+OPENROUTER_API_KEY=your_api_key
+OPENROUTER_MODEL=google/gemini-flash-1.5
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+```
+
+## Run
+
+```bash
+python main.py
+```
+
+API available at `http://localhost:8000`
+
+## API Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/v1/chat` | Legal Q&A |
+| `POST /api/v1/contracts/analyze` | Contract risk analysis |
+| `POST /api/v1/procedures` | Procedure guidance |
+| `POST /api/v1/db/upload` | Upload legal documents |
+
+## License
+
+MIT
