@@ -5,13 +5,13 @@ from fastapi import APIRouter, Depends, UploadFile, File, BackgroundTasks, HTTPE
 from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from app.db.models import LawChunk, OCRDocument, LawDocument
-from app.services.rag_service import RAGService # Đảm bảo đã import service này
+from app.services.rag_service import RAGService
 
 router = APIRouter()
 UPLOAD_DIR = "static/docs"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# --- Dependency lấy DB (Khai báo 1 lần duy nhất) ---
+
 def get_db():
     db = SessionLocal()
     try:
@@ -19,11 +19,8 @@ def get_db():
     finally:
         db.close()
 
-# ============================================================
-# 1. VIEW: Xem danh sách tài liệu (Gộp 2 API cũ của bạn thành 1)
-# ============================================================
 
-# Liệt kê tài liệu OCR
+
 @router.get("/db/ocr-documents", tags=["Admin Dashboard"])
 def list_ocr_documents(db: Session = Depends(get_db)):
     docs = db.query(OCRDocument).order_by(OCRDocument.created_at.desc()).all()
@@ -41,7 +38,6 @@ def list_ocr_documents(db: Session = Depends(get_db)):
         })
     return result
 
-# Liệt kê luật RAG
 @router.get("/db/laws", tags=["Admin Dashboard"])
 def list_laws(db: Session = Depends(get_db)):
     laws = db.query(LawChunk).order_by(LawChunk.id.desc()).all()
@@ -55,9 +51,7 @@ def list_laws(db: Session = Depends(get_db)):
         for law in laws
     ]
 
-# ============================================================
-# 2. UPLOAD: Nạp dữ liệu (Hỗ trợ JSON & PDF)
-# ============================================================
+
 @router.post("/db/upload", tags=["Admin Dashboard"])
 async def upload_document(
     background_tasks: BackgroundTasks,
@@ -79,15 +73,14 @@ async def upload_document(
     action_msg = ""
     trigger_rag = False
 
-    # --- XỬ LÝ FILE JSON (RAG DATA) ---
+    # JSON file processing
     if file.filename.lower().endswith(".json"):
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
             items = data if isinstance(data, list) else [data]
             
-            # A. Xử lý Document Cha (Thay thế cho document_id=1)
-            # Lấy tên file làm tên Luật (bỏ đuôi .json)
+
             doc_name = file.filename.rsplit('.', 1)[0].replace("_", " ")
             
             law_doc = db.query(LawDocument).filter(LawDocument.name == doc_name).first()
@@ -97,11 +90,11 @@ async def upload_document(
                 db.commit()
                 db.refresh(law_doc) # Lấy ID thật sự từ DB
 
-            # B. Lấy danh sách Title đã có để chống trùng lặp
+
             existing_chunks = db.query(LawChunk.title).filter(LawChunk.document_id == law_doc.id).all()
             existing_titles = {chunk.title for chunk in existing_chunks}
 
-            # C. Thêm Chunk con
+
             new_chunks = []
             for item in items:
                 title = item.get("title", "Không tiêu đề")
@@ -115,7 +108,7 @@ async def upload_document(
                     new_chunk = LawChunk(
                         title=title,
                         content=content,
-                        document_id=law_doc.id # Gắn đúng ID cha vừa tạo/tìm thấy
+                        document_id=law_doc.id
                     )
                     new_chunks.append(new_chunk)
                     imported_count += 1
@@ -134,7 +127,7 @@ async def upload_document(
             return {"status": "error", "message": f"Lỗi xử lý JSON: {str(e)}"}
 
 
-    # --- XỬ LÝ FILE PDF (OCR DATA) ---
+    # PDF file processing
     elif file.filename.lower().endswith(".pdf"):
         text_content = ""
         try:
@@ -157,12 +150,12 @@ async def upload_document(
         db.add(new_doc)
         db.commit()
         action_msg = "Đã lưu file PDF và nội dung OCR."
-        # Lưu ý: Nếu muốn RAG học cả PDF này, bạn cần code thêm logic chuyển PDF -> LawChunk ở đây.
+
 
     else:
         return {"status": "error", "message": "Chỉ hỗ trợ .json hoặc .pdf"}
 
-    # --- QUAN TRỌNG: Trigger AI học lại ---
+    # Trigger RAG refresh
     if trigger_rag:
         background_tasks.add_task(RAGService.refresh_knowledge)
         action_msg += " AI đang cập nhật dữ liệu..."
@@ -174,9 +167,7 @@ async def upload_document(
         "skipped_count": skipped_count
     }
 
-# ============================================================
-# 3. DELETE: Xóa dữ liệu sai (Sửa để hỗ trợ Schema mới)
-# ============================================================
+
 @router.delete("/db/law-documents/{doc_id}", tags=["Admin Dashboard"])
 def delete_law_document(
     doc_id: int, 
@@ -187,17 +178,17 @@ def delete_law_document(
     Xóa một bộ luật (LawDocument).
     Tự động xóa tất cả các điều khoản con (LawChunk) nhờ Cascade Delete.
     """
-    # Tìm trong bảng LawDocument (Bảng cha của RAG)
+
     doc = db.query(LawDocument).filter(LawDocument.id == doc_id).first()
     
     if not doc:
         raise HTTPException(status_code=404, detail="Không tìm thấy văn bản luật này")
 
-    # Xóa trong DB -> Các LawChunk con sẽ tự mất theo
+
     db.delete(doc)
     db.commit()
 
-    # Trigger AI học lại (Để quên kiến thức cũ)
+    # Refresh RAG index
     background_tasks.add_task(RAGService.refresh_knowledge)
 
     return {"status": "success", "message": f"Đã xóa bộ luật '{doc.name}' và cập nhật lại AI."}
