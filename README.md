@@ -1,9 +1,6 @@
 # ViLaw - Legal AI Assistant
-
 A RAG-based legal assistant for Vietnamese legislation analysis.
-
 ## Overview
-
 ViLaw provides context-aware retrieval and analysis of Vietnamese legal documents using BM25 lexical search combined with LLM-powered responses. The system processes 1,000+ official legal documents with Vietnamese word segmentation for accurate query matching.
 
 ## Tech Stack
