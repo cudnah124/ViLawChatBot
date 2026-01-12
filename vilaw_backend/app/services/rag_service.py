@@ -16,7 +16,7 @@ class RAGService:
     _doc_texts = None
     _llm = None
     
-    # Định nghĩa System Prompt là hằng số để dễ quản lý, tránh viết lặp lại
+
     SYSTEM_PROMPT = """
     <|im_start|>system
     Bạn là ViLaw, trợ lý pháp lý. Chỉ trả lời các câu hỏi liên quan đến pháp luật tại Việt Nam.
@@ -30,8 +30,7 @@ class RAGService:
     <|im_end|>
     """
 
-    def __new__(cls):
-        # Singleton Pattern: Chỉ khởi tạo 1 lần duy nhất
+        # Singleton
         if cls._instance is None:
             cls._instance = super(RAGService, cls).__new__(cls)
             # cls._init_resources()
@@ -39,7 +38,6 @@ class RAGService:
 
     @classmethod
     def _init_resources(cls):
-        """Hàm này chỉ chạy 1 lần khi server khởi động"""
         print("--- RAGService: Initializing Resources... ---")
 
 
@@ -53,8 +51,6 @@ class RAGService:
         if not cls._doc_texts:
             cls._doc_texts = ["Không có dữ liệu pháp luật trong database."]
 
-        # Tokenize & Build BM25
-        # Lưu ý: corpus_tokenized không cần lưu vào class attribute nếu chỉ dùng để build bm25
         corpus_tokenized = [word_tokenize(doc, format="text").split() for doc in cls._doc_texts]
         cls._bm25 = BM25Okapi(corpus_tokenized)
         
@@ -63,14 +59,13 @@ class RAGService:
         print("--- RAGService: Ready ---")
 
     def retrieve(self, query, k=3):
-        # Sửa lỗi: Dùng self._bm25 thay vì self.bm25
+
         query_tok = word_tokenize(query, format="text").split()
         scores = self._bm25.get_scores(query_tok)
         top_idx = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:k]
         return [self._doc_texts[i] for i in top_idx]
 
     def _create_prompt(self, history_str):
-        """Hàm helper để ghép prompt động"""
         full_template = f"""
 {self.SYSTEM_PROMPT}
 {history_str}
@@ -83,7 +78,6 @@ Câu hỏi: {{question}}
 
     @classmethod
     def refresh_knowledge(cls):
-        """Public method to refresh/reload RAG resources (rebuild BM25, reload chunks)."""
         try:
             cls._init_resources()
             print("RAGService: Knowledge refreshed.")
@@ -91,7 +85,7 @@ Câu hỏi: {{question}}
             print(f"RAGService.refresh_knowledge error: {e}")
 
     async def chat_stream(self, message: str, conversation_id: str = '1', db=None):
-        # Logic quản lý DB Session
+
         close_db = False
         if db is None:
             db = SessionLocal()
