@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, validator
 from app.services.llm_engine import get_llm
 from app.schemas.contract_schema import RiskAnalysisRequest
 
-# --- 1. Định nghĩa Enums & Schema chặt chẽ ---
+
 
 class RiskSeverity(str, Enum):
     HIGH = "High"
@@ -27,14 +27,13 @@ class AIOutputStructure(BaseModel):
     missing_fields: List[str] = Field(description="Danh sách các mục bắt buộc bị thiếu (VD: Chữ ký, Ngày hiệu lực)")
     risks: List[RiskItem] = Field(description="Danh sách chi tiết các rủi ro tìm thấy")
 
-    # Validator để đảm bảo điểm số hợp lệ
     @validator('overall_score')
     def check_score(cls, v):
         if not (0 <= v <= 100):
             return 0
         return v
 
-# --- 2. Service Logic ---
+
 
 class RiskCheckerService:
     _instance = None
@@ -42,15 +41,13 @@ class RiskCheckerService:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(RiskCheckerService, cls).__new__(cls)
-            # Temp = 0.0 để đảm bảo tính nhất quán và nghiêm ngặt nhất
             cls._instance.llm = get_llm(streaming=False, temperature=0.0)
         return cls._instance
 
     async def analyze_document(self, data: RiskAnalysisRequest) -> dict:
-        # Sử dụng Schema có cấu trúc lồng nhau (Nested)
         parser = JsonOutputParser(pydantic_object=AIOutputStructure)
 
-        # Prompt được tinh chỉnh để tránh Hallucination (Bịa luật)
+
         prompt = ChatPromptTemplate.from_template("""
         <|im_start|>system
         Bạn là Chuyên gia Pháp chế & Kiểm soát Rủi ro Hợp đồng (Legal Risk Compliance) hàng đầu tại Việt Nam.
@@ -85,8 +82,7 @@ class RiskCheckerService:
         chain = prompt | self.llm | parser
 
         try:
-            # Lưu ý: Nếu văn bản quá dài (>10.000 từ), cần có cơ chế cắt nhỏ (Chunking) ở đây
-            # Nhưng với các hợp đồng tiêu chuẩn, Gemini Flash/Pro xử lý tốt context window lớn.
+
             result = await chain.ainvoke({
                 "contract_type": data.contract_type,
                 "content": data.content,
@@ -95,8 +91,7 @@ class RiskCheckerService:
             return result
             
         except Exception as e:
-            # Fallback handling chuẩn cấu trúc
-            print(f"Lỗi phân tích rủi ro: {e}")
+            print(f"Risk analysis error: {e}")
             return AIOutputStructure(
                 overall_score=0,
                 completeness_status="Lỗi hệ thống khi phân tích",
@@ -112,7 +107,7 @@ class RiskCheckerService:
                 ]
             ).dict()
 
-# --- Helper test ---
+
 if __name__ == "__main__":
     import asyncio
     async def test():
