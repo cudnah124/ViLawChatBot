@@ -1,7 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
-# --- Phần AI Generate (Thêm description để AI hiểu nhiệm vụ) ---
+
 class DocumentItem(BaseModel):
     name: str = Field(..., description="Tên chính xác của giấy tờ")
     instruction: str = Field(..., description="Yêu cầu cụ thể: bản chính, bản sao y công chứng, hay số lượng bao nhiêu")
@@ -19,10 +19,9 @@ class ProcedureGuideResponse(BaseModel):
     steps: List[ProcedureStep] = Field(..., description="Danh sách các bước thực hiện theo trình tự")
     required_documents: List[DocumentItem] = Field(..., description="Danh sách thành phần hồ sơ bắt buộc")
 
-# --- Phần Dashboard CRUD (Dùng cho API lưu Database) ---
+
 class CreateProcedureRequest(BaseModel):
     title: str
-    # Lưu ý: Khi lưu vào DB (PostgreSQL JSONB hoặc MongoDB), cấu trúc này rất tốt
     data: ProcedureGuideResponse 
 
 class UpdateProcedureStatus(BaseModel):
